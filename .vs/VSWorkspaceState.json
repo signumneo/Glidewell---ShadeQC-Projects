@@ -1,0 +1,15 @@
+{
+  "OutputFoldersPerTargetSystem": {
+    "Local Machine": [
+      "out\\build\\x64-Debug",
+      "out\\install\\x64-Debug"
+    ]
+  },
+  "ExpandedNodes": [
+    "",
+    "\\out",
+    "\\out\\build"
+  ],
+  "SelectedNode": "\\simple_live_windows_forms_csharp.csproj",
+  "PreviewInSolutionExplorer": false
+}
