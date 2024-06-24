@@ -36,8 +36,6 @@ import os
 import time
 import cv2
 import numpy as np
-from calibration_processor import CalibrationProcessor
-from calibration_data import CalibrationData
 from PySide6.QtWidgets import (
     QHBoxLayout,
     QVBoxLayout,
@@ -471,14 +469,6 @@ class MainWindow(QMainWindow):
         self.capture_right_button.clicked.connect(self.capture_right_image)
         self.__main_layout.addWidget(self.capture_right_button)
 
-        self.calibrate_individual_button = QPushButton(
-            "Calibrate Individual Cameras", self
-        )
-        self.calibrate_individual_button.clicked.connect(
-            self.calibrate_individual_cameras
-        )
-        self.__main_layout.addWidget(self.calibrate_individual_button)
-
     # Manual capture button - If needed
     def capture_image(self):
         images = self.acquire_images()
@@ -557,19 +547,6 @@ class MainWindow(QMainWindow):
                 self, "Image Captured", f"Image saved to {file_path}"
             )
 
-    def calibrate_individual_cameras(self):
-        calibration_processor = CalibrationProcessor(
-            "CapturedImages/LeftCamera", "CapturedImages/RightCamera", (8, 11), 0.5
-        )
-        calibration_processor.calibrate_individual_camera(
-            "CapturedImages/LeftCamera", "left"
-        )
-        calibration_processor.calibrate_individual_camera(
-            "CapturedImages/RightCamera", "right"
-        )
-        self.display_calibration_metrics("Left")
-        self.display_calibration_metrics("Right")
-
     def display_calibration_metrics(self, camera):
         base_dir = os.path.dirname(__file__)
         file_path = os.path.join(
@@ -589,42 +566,6 @@ class MainWindow(QMainWindow):
                 self, "Calibration Metrics", f"No calibration data found for {camera}."
             )
             return
-
-        calibration_data = CalibrationData.load(file_path)
-        if calibration_data is not None:
-            if camera == "Stereo":
-                # Display stereo calibration data
-                metrics = (
-                    f"Rotation Matrix:\n{calibration_data.rotation_matrix}\n\n"
-                    f"Translation Vector:\n{calibration_data.translation_vector}\n\n"
-                    f"Essential Matrix:\n{calibration_data.essential_matrix}\n\n"
-                    f"Fundamental Matrix:\n{calibration_data.fundamental_matrix}"
-                )
-            else:
-                # Format the calibration data to 2 decimal places
-                camera_matrix = np.array(calibration_data.camera_matrix)
-                distortion_coefficients = np.array(
-                    calibration_data.distortion_coefficients
-                )
-
-                formatted_camera_matrix = [
-                    [round(float(val), 2) for val in row] for row in camera_matrix
-                ]
-                formatted_distortion_coefficients = [
-                    round(float(val), 2) for val in distortion_coefficients[0]
-                ]
-
-                # Display the calibration data using QMessageBox or another appropriate method
-                metrics = (
-                    f"Camera Matrix ({camera}):\n{formatted_camera_matrix}\n\n"
-                    f"Distortion Coefficients ({camera}):\n{formatted_distortion_coefficients}\n\n"
-                )
-            QMessageBox.information(self, "Calibration Metrics", metrics)
-        else:
-            print(f"Failed to load calibration data from {file_path}")  # Debug print
-            QMessageBox.information(
-                self, "Calibration Metrics", "No calibration data found."
-            )
 
     def acquire_images(self, single_camera=None):
         """
